@@ -1,0 +1,27 @@
+[package]
+name = "reporadar"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+description = "A live, interactive terminal dashboard for the status of every git repo under a directory tree"
+license = "MIT OR Apache-2.0"
+keywords = ["git", "tui", "terminal", "dashboard", "cli"]
+categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "reporadar"
+path = "src/main.rs"
+
+[dependencies]
+ratatui = "0.30"
+crossterm = "0.29"
+clap = { version = "4", features = ["derive"] }
+walkdir = "2"
+crossbeam-channel = "0.5"
+nucleo-matcher = "0.3"
+which = "8"
+color-eyre = "0.6"
+
+[profile.release]
+lto = true
+strip = true
