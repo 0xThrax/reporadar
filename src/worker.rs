@@ -38,9 +38,8 @@ fn run_job(job: Job) -> JobResult {
     match job {
         Job::ScanRoot(root, max_depth) => JobResult::Scanned(scan::find_repos(&root, max_depth)),
         Job::Status(path) => {
-            let result = git::status(&path).and_then(|status| {
-                git::last_commit(&path).map(|commit| (status, commit))
-            });
+            let result = git::status(&path)
+                .and_then(|status| git::last_commit(&path).map(|commit| (status, commit)));
             JobResult::Status(path, result)
         }
         Job::Fetch(path) => {

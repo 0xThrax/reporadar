@@ -2,11 +2,11 @@ use std::io::{stdout, Stdout};
 
 use color_eyre::eyre::Result;
 use crossterm::cursor::{Hide, Show};
+use crossterm::execute;
 use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, is_raw_mode_enabled, EnterAlternateScreen,
     LeaveAlternateScreen,
 };
-use crossterm::execute;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
 

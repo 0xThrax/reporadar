@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  CARGO_TERM_COLOR: always
+  BINARY_NAME: reporadar
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.suffix }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            suffix: linux-amd64
+          - runner: ubuntu-24.04-arm
+            suffix: linux-arm64
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Package
+        run: |
+          cp target/release/${{ env.BINARY_NAME }} ${{ env.BINARY_NAME }}-${{ matrix.suffix }}
+          tar czf ${{ env.BINARY_NAME }}-${{ matrix.suffix }}.tar.gz \
+            ${{ env.BINARY_NAME }}-${{ matrix.suffix }} README.md LICENSE-MIT LICENSE-APACHE
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BINARY_NAME }}-${{ matrix.suffix }}
+          path: ${{ env.BINARY_NAME }}-${{ matrix.suffix }}.tar.gz
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v5
+        with:
+          path: ./artifacts
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          {
+            echo 'CHANGELOG<<EOF'
+            if [ -z "$PREV_TAG" ]; then
+              echo "Initial release"
+            else
+              git log --pretty=format:"- %s" ${PREV_TAG}..HEAD | grep -v "^- Merge" || echo "No changes"
+            fi
+            echo
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## Changes
+            ${{ steps.changelog.outputs.CHANGELOG }}
+          files: ./artifacts/*/*.tar.gz

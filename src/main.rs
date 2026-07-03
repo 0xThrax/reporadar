@@ -1,12 +1,3 @@
-mod app;
-mod event;
-mod external;
-mod git;
-mod scan;
-mod tui;
-mod ui;
-mod worker;
-
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -15,8 +6,9 @@ use color_eyre::eyre::Result;
 use crossbeam_channel::unbounded;
 use crossterm::event::{Event, KeyEventKind};
 
-use app::App;
-use worker::{Job, JobResult};
+use reporadar::app::App;
+use reporadar::worker::{Job, JobResult};
+use reporadar::{event, external, tui, ui, worker};
 
 #[derive(Parser)]
 #[command(
@@ -65,11 +57,9 @@ fn main() -> Result<()> {
 
         terminal.draw(|f| ui::draw(f, &app))?;
 
-        if let Some(event) = event::next_event(Duration::from_millis(120))? {
-            if let Event::Key(key) = event {
-                if key.kind == KeyEventKind::Press {
-                    app.on_key(key);
-                }
+        if let Some(Event::Key(key)) = event::next_event(Duration::from_millis(120))? {
+            if key.kind == KeyEventKind::Press {
+                app.on_key(key);
             }
         }
 

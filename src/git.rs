@@ -25,7 +25,13 @@ fn run_git(repo: &Path, args: &[&str]) -> Result<String> {
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()
-        .with_context(|| format!("failed to spawn `git {}` in {}", args.join(" "), repo.display()))?;
+        .with_context(|| {
+            format!(
+                "failed to spawn `git {}` in {}",
+                args.join(" "),
+                repo.display()
+            )
+        })?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);

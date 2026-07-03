@@ -6,9 +6,15 @@ use ratatui::Frame;
 use crate::app::{App, RowState};
 
 pub fn render(frame: &mut Frame, area: Rect, app: &App) {
-    let header = Row::new(vec!["Repo", "Branch", "Status", "Ahead/Behind", "Last Commit"])
-        .style(Style::default().add_modifier(Modifier::BOLD))
-        .bottom_margin(1);
+    let header = Row::new(vec![
+        "Repo",
+        "Branch",
+        "Status",
+        "Ahead/Behind",
+        "Last Commit",
+    ])
+    .style(Style::default().add_modifier(Modifier::BOLD))
+    .bottom_margin(1);
 
     let rows: Vec<Row> = app
         .filtered
@@ -21,21 +27,26 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
                 (format!("error: {err}"), Style::default().fg(Color::Red))
             } else {
                 match repo.state {
-                    RowState::Scanning => {
-                        ("scanning\u{2026}".to_string(), Style::default().fg(Color::DarkGray))
-                    }
-                    RowState::Fetching => {
-                        ("fetching\u{2026}".to_string(), Style::default().fg(Color::Cyan))
-                    }
-                    RowState::Pulling => {
-                        ("pulling\u{2026}".to_string(), Style::default().fg(Color::Cyan))
-                    }
-                    RowState::Idle if repo.dirty => {
-                        ("\u{25cf} dirty".to_string(), Style::default().fg(Color::Yellow))
-                    }
-                    RowState::Idle => {
-                        ("\u{2713} clean".to_string(), Style::default().fg(Color::Green))
-                    }
+                    RowState::Scanning => (
+                        "scanning\u{2026}".to_string(),
+                        Style::default().fg(Color::DarkGray),
+                    ),
+                    RowState::Fetching => (
+                        "fetching\u{2026}".to_string(),
+                        Style::default().fg(Color::Cyan),
+                    ),
+                    RowState::Pulling => (
+                        "pulling\u{2026}".to_string(),
+                        Style::default().fg(Color::Cyan),
+                    ),
+                    RowState::Idle if repo.dirty => (
+                        "\u{25cf} dirty".to_string(),
+                        Style::default().fg(Color::Yellow),
+                    ),
+                    RowState::Idle => (
+                        "\u{2713} clean".to_string(),
+                        Style::default().fg(Color::Green),
+                    ),
                 }
             };
 
@@ -75,7 +86,11 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
     let table = Table::new(rows, widths)
         .header(header)
         .block(Block::default().borders(Borders::ALL).title(" repos "))
-        .row_highlight_style(Style::default().bg(Color::DarkGray).add_modifier(Modifier::BOLD))
+        .row_highlight_style(
+            Style::default()
+                .bg(Color::DarkGray)
+                .add_modifier(Modifier::BOLD),
+        )
         .highlight_symbol("\u{25b6} ");
 
     let mut state = TableState::default();

@@ -91,7 +91,11 @@ impl App {
                     .unwrap_or(&path)
                     .to_string_lossy()
                     .to_string();
-                let name = if name.is_empty() { ".".to_string() } else { name };
+                let name = if name.is_empty() {
+                    ".".to_string()
+                } else {
+                    name
+                };
 
                 self.job_tx.send(Job::Status(path.clone())).ok();
                 self.inflight += 1;
@@ -139,21 +143,19 @@ impl App {
                     repo.state = RowState::Idle;
                 }
             }
-            JobResult::Fetched(path, result) => {
-                match result {
-                    Ok(()) => {
-                        self.job_tx.send(Job::Status(path.clone())).ok();
-                        self.inflight += 1;
-                    }
-                    Err(e) => {
-                        if let Some(repo) = self.repos.iter_mut().find(|r| r.path == path) {
-                            repo.error = Some(e.to_string());
-                            repo.state = RowState::Idle;
-                        }
-                        self.status_line = Some((format!("fetch failed: {e}"), true));
-                    }
+            JobResult::Fetched(path, result) => match result {
+                Ok(()) => {
+                    self.job_tx.send(Job::Status(path.clone())).ok();
+                    self.inflight += 1;
                 }
-            }
+                Err(e) => {
+                    if let Some(repo) = self.repos.iter_mut().find(|r| r.path == path) {
+                        repo.error = Some(e.to_string());
+                        repo.state = RowState::Idle;
+                    }
+                    self.status_line = Some((format!("fetch failed: {e}"), true));
+                }
+            },
             JobResult::Pulled(path, result) => {
                 if let Some(repo) = self.repos.iter_mut().find(|r| r.path == path) {
                     repo.state = RowState::Idle;
@@ -243,7 +245,11 @@ impl App {
     }
 
     fn fetch_all(&mut self) {
-        let paths: Vec<PathBuf> = self.filtered.iter().map(|&i| self.repos[i].path.clone()).collect();
+        let paths: Vec<PathBuf> = self
+            .filtered
+            .iter()
+            .map(|&i| self.repos[i].path.clone())
+            .collect();
         for path in paths {
             if let Some(repo) = self.repos.iter_mut().find(|r| r.path == path) {
                 repo.state = RowState::Fetching;
@@ -293,7 +299,7 @@ impl App {
                 })
                 .collect();
 
-            scored.sort_by(|a, b| b.1.cmp(&a.1));
+            scored.sort_by_key(|&(_, score)| std::cmp::Reverse(score));
             self.filtered = scored.into_iter().map(|(i, _)| i).collect();
         }
 

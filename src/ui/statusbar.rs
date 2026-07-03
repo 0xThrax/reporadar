@@ -11,7 +11,10 @@ pub fn render(frame: &mut Frame, area: Rect, app: &App) {
         (msg.clone(), Style::default().fg(color))
     } else if app.scanning && app.repos.is_empty() {
         (
-            format!(" scanning {} for git repositories\u{2026}", app.root.display()),
+            format!(
+                " scanning {} for git repositories\u{2026}",
+                app.root.display()
+            ),
             Style::default().fg(Color::Cyan),
         )
     } else {
