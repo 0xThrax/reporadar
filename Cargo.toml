@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.82"
 description = "A live, interactive terminal dashboard for the status of every git repo under a directory tree"
-license = "MIT OR Apache-2.0"
+license = "MIT"
 keywords = ["git", "tui", "terminal", "dashboard", "cli"]
 categories = ["command-line-utilities", "development-tools"]
 
